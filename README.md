@@ -1,3 +1,5 @@
+![Banner](img/banner.png)
+
 # scriptor
 
 Find scripts in a repository, type to filter, and run the one you select.
