@@ -1,0 +1,45 @@
+Feature: scriptor
+  Find and select repository scripts with an interactive terminal.
+
+  @version
+  Scenario: Print the build version
+    When I run "scriptor --version"
+    Then exit code is 0
+    Then output contains "0.1.0+unknown"
+
+  @failure
+  Scenario: Reject extra options
+    When I run "scriptor --list" expecting exit code 1
+    Then exit code is 1
+    Then output contains "usage: scriptor [--version]"
+
+  @failure
+  Scenario: Report an empty scan
+    When I run "scriptor" expecting exit code 1
+    Then exit code is 1
+    Then output contains "no scripts found"
+
+  @interactive @git
+  Scenario: Filter and run from the repository root with inherited input
+    When I run "scriptor-terminal run"
+    Then exit code is 0
+    Then output contains "answer=hello"
+    Then file "repo/ran.txt" exists
+
+  @interactive @cancel
+  Scenario: Cancel without running a sole result
+    When I run "scriptor-terminal cancel"
+    Then exit code is 0
+    Then file "repo/ran.txt" does not exist
+
+  @interactive @failure
+  Scenario: Preserve the selected script exit code
+    When I run "scriptor-terminal fail" expecting exit code 7
+    Then exit code is 7
+    Then output contains "Running scripts/build task.sh"
+
+  @interactive @failure
+  Scenario: Require a terminal when scripts exist
+    When I run "scriptor-terminal nonterminal" expecting exit code 1
+    Then exit code is 1
+    Then output contains "requires an interactive terminal"

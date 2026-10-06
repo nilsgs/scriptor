@@ -1,0 +1,15 @@
+FROM golang:1.26 AS builder
+WORKDIR /build
+COPY src/ .
+COPY VERSION /tmp/VERSION
+RUN go test ./... && go build -ldflags "-s -w -X scriptor/cmd.version=$(cat /tmp/VERSION) -X scriptor/cmd.commit=unknown" -o /usr/local/bin/scriptor .
+
+FROM debian:bookworm-slim
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git python3 bash \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /usr/local/bin/scriptor /usr/local/bin/scriptor
+COPY specs/support/terminal.py /usr/local/bin/scriptor-terminal
+RUN chmod +x /usr/local/bin/scriptor-terminal
+ENV TERM=xterm
+WORKDIR /smoko-work

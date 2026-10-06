@@ -1,0 +1,3 @@
+image = "scriptor-test:latest"
+timeout = 30
+build = "docker build -f Dockerfile.test -t scriptor-test:latest ."
